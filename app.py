@@ -10,34 +10,37 @@ load_dotenv()
 
 # Crear aplicación Flask
 app = Flask(__name__)
-CORS(app)
+
+# Configurar CORS
+CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
 # Configurar base de datos
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Iniciar SQLAlchemy con app
+# Inicializar la base de datos
 db.init_app(app)
 
-# Importar modelos después de inicializar db
+# Registrar modelos y blueprints
 with app.app_context():
     from models.apoderado import Apoderado
     from models.estudiante import Estudiante
     from models.admin import Admin
 
-    apoderado_test = Apoderado.query.first()
-    print("Apoderado test:", apoderado_test)
+    # Importar y registrar el blueprint de login
+    from routes.login import login_bp
+    app.register_blueprint(login_bp)
 
-    estudiante_test = Estudiante.query.first()
-    print("Estudiante test:", estudiante_test)
-    
-    admin_test = Admin.query.first()    
-    print("admin", admin_test)
+    # Prints de prueba
+    print("Apoderado test:", Apoderado.query.first())
+    print("Estudiante test:", Estudiante.query.first())
+    print("Admin test:", Admin.query.first())
 
+# Ruta raíz de prueba
 @app.route('/')
 def home():
     return 'Servidor EscolarView funcionando correctamente 🚐'
-# Ejecutar el servidor
-if __name__ == '__main__':
-    app.run(debug=True)   
 
+# Iniciar servidor
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
